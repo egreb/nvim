@@ -256,6 +256,9 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+vim.o.tabstop = 4
+vim.o.shiftwidth = 4
+
 -- [[ Basic Keymaps ]]
 
 -- Keymaps for better default experience
@@ -317,11 +320,14 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').lsp_document_symbols,
   { desc = 'List functions and commands' })
 
+-- [[ Buffer ]]
+vim.keymap.set("n", "<leader>x", ":bp|bd #<CR>", { noremap = true })
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'go', 'lua', 'tsx', 'typescript', 'vimdoc', 'vim', 'html' },
+  ensure_installed = { 'go', 'lua', 'tsx', 'typescript', 'vimdoc', 'vim', 'html', "astro" },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -444,7 +450,6 @@ end
 --  define the property 'filetypes' to the map in question.
 local servers = {
   -- gopls = {},
-  tsserver = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
   lua_ls = {
     Lua = {
@@ -498,6 +503,24 @@ require('lspconfig').gopls.setup {
   }
 }
 
+require('lspconfig').tsserver.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  on_attach = function(client, bufnr)
+    client.resolved_capabilities.document_formatting = false
+    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>fm", "<cmd>lua vim.lsp.buf.formatting()<CR>", {})
+  end,
+}
+
+require('lspconfig').astro.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  filetypes = { "astro" },
+  cmd = { "astro-ls", "--stdio" },
+  root_dir = require("lspconfig.util").root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git"),
+  typescript = {},
+}
+
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
 local cmp = require 'cmp'
@@ -548,3 +571,6 @@ cmp.setup {
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- custom keymaps
+vim.keymap.set('n', '<leader>x', ":close<cr>", { desc = 'Close current buffer' })

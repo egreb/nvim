@@ -1,20 +1,12 @@
 local M = {
 	"jose-elias-alvarez/null-ls.nvim",
-	opts = function(_, opts)
+	opts = function(_, _)
 		local status, null_ls = pcall(require, "null-ls")
 		if (not status) then return end
 		local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
-		local lsp_formatting = function(bufnr)
-			vim.lsp.buf.format({
-				filter = function(client)
-					return client.name == "null-ls"
-				end,
-				bufnr = bufnr,
-			})
-		end
-
 		null_ls.setup {
+			debug = true,
 			sources = {
 				null_ls.builtins.formatting.prettierd,
 				null_ls.builtins.diagnostics.eslint_d.with({
@@ -28,7 +20,7 @@ local M = {
 						group = augroup,
 						buffer = bufnr,
 						callback = function()
-							lsp_formatting(bufnr)
+							vim.lsp.buf.format({ async = false })
 						end,
 					})
 				end
