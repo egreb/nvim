@@ -198,12 +198,17 @@ require('lazy').setup({
     config = function() end,
     lazy = false,
   },
-
+  {
+    'stevearc/oil.nvim',
+    opts = {},
+    -- Optional dependencies
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+  },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
-  require 'kickstart.plugins.autoformat',
+  -- require 'kickstart.plugins.autoformat',
   -- require 'kickstart.plugins.debug',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
@@ -258,6 +263,7 @@ vim.o.termguicolors = true
 
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
+vim.o.relativenumber = true
 
 -- [[ Basic Keymaps ]]
 
@@ -319,9 +325,26 @@ vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').lsp_document_symbols,
   { desc = 'List functions and commands' })
+vim.keymap.set('n', '<leader>cr', require('telescope.builtin').lsp_references, { desc = '[C]ode [R]eferences' })
+vim.keymap.set('n', '<leader>sc', ':Telescope resume<CR>', { desc = '[S]earch [C]ontinue' })
 
 -- [[ Buffer ]]
 vim.keymap.set("n", "<leader>x", ":bp|bd #<CR>", { noremap = true })
+
+-- [[ Move ]]
+-- vim.keymap.set("n", "<C-K>", ":m .+2<CR>==", { noremap = true })
+-- vim.keymap.set("n", "<C-J>", ":m .-21<CR>==", { noremap = true })
+
+-- [[ OIL ]]
+vim.keymap.set("n", "<leader>b", ":Oil<CR>", { noremap = true })
+
+vim.keymap.set("n", "<leader>cf", "<cmd> OrganizeImports <CR>", {})
+
+-- nnoremap <A-k> :m .-2<CR>==
+-- inoremap <A-j> <Esc>:m .+1<CR>==gi
+-- inoremap <A-k> <Esc>:m .-2<CR>==gi
+-- vnoremap <A-j> :m '>+1<CR>gv=gv
+-- vnoremap <A-k> :m '<-2<CR>gv=gv
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
@@ -503,13 +526,29 @@ require('lspconfig').gopls.setup {
   }
 }
 
+local function organize_imports()
+  local params = {
+    command = "_typescript.organizeImports",
+    arguments = { vim.api.nvim_buf_get_name(0) },
+    title = "",
+  }
+  vim.lsp.buf.execute_command(params)
+end
+
 require('lspconfig').tsserver.setup {
-  on_attach = on_attach,
   capabilities = capabilities,
-  on_attach = function(client, bufnr)
-    client.resolved_capabilities.document_formatting = false
-    vim.api.nvim_buf_set_keymap(bufnr, "n", "<space>fm", "<cmd>lua vim.lsp.buf.formatting()<CR>", {})
-  end,
+  -- on_attach = function(client, bufnr)
+  --   client.resolved_capabilities.document_formatting = false
+  --   vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>fm", "<cmd>lua vim.lsp.buf.formatting()<CR>", {})
+  -- end,
+  on_attach = on_attach,
+  -- filetypes = { "typescript", "typescriptreact", "typescript.tsx" },
+  commands = {
+    OrganizeImports = {
+      organize_imports,
+      description = "Organize imports",
+    }
+  }
 }
 
 require('lspconfig').astro.setup {
