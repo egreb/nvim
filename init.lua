@@ -329,7 +329,7 @@ vim.keymap.set('n', '<leader>cr', require('telescope.builtin').lsp_references, {
 vim.keymap.set('n', '<leader>sc', ':Telescope resume<CR>', { desc = '[S]earch [C]ontinue' })
 
 -- [[ Buffer ]]
-vim.keymap.set("n", "<leader>x", ":bd<CR>", { noremap = true })
+vim.keymap.set('n', '<leader>x', ':bd<CR>', { desc= '[C]lose buffer' })
 
 -- [[ Move ]]
 -- vim.keymap.set("n", "<C-K>", ":m .+2<CR>==", { noremap = true })
@@ -611,5 +611,3 @@ cmp.setup {
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 
--- custom keymaps
-vim.keymap.set('n', '<leader>x', ":close<cr>", { desc = 'Close current buffer' })
