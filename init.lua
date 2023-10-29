@@ -107,7 +107,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim',          opts = {} },
+  { 'folke/which-key.nvim',                opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -129,14 +129,14 @@ require('lazy').setup({
     },
   },
 
-  {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
-    priority = 1000,
-    config = function()
-      vim.cmd.colorscheme 'onedark'
-    end,
-  },
+  -- {
+  --   -- Theme inspired by Atom
+  --   'navarasu/onedark.nvim',
+  --   priority = 1000,
+  --   config = function()
+  --     -- vim.cmd.colorscheme 'onedark'
+  --   end,
+  -- },
 
   {
     -- Set lualine as statusline
@@ -145,24 +145,13 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'onedark',
+        theme = 'kanagawa',
         component_separators = '|',
         section_separators = '',
       },
     },
   },
-
-  {
-    -- Add indentation guides even on blank lines
-    'lukas-reineke/indent-blankline.nvim',
-    -- Enable `lukas-reineke/indent-blankline.nvim`
-    -- See `:help indent_blankline.txt`
-    opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
-    },
-  },
-
+  { "lukas-reineke/indent-blankline.nvim", main = "ibl", opts = {} },
   -- "gc" to comment visual regions/lines
   {
     'numToStr/Comment.nvim',
@@ -203,6 +192,14 @@ require('lazy').setup({
     opts = {},
     -- Optional dependencies
     dependencies = { "nvim-tree/nvim-web-devicons" },
+  },
+  'fatih/vim-go',
+  {
+    'rebelot/kanagawa.nvim',
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme 'kanagawa'
+    end,
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -350,23 +347,36 @@ vim.keymap.set("n", "<leader>cf", "<cmd> OrganizeImports <CR>", {})
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'go', 'lua', 'tsx', 'typescript', 'vimdoc', 'vim', 'html', "astro" },
-
+  ensure_installed      = {
+    'go',
+    'lua',
+    'tsx',
+    'typescript',
+    'vimdoc',
+    'vim',
+    'html',
+    'astro',
+    'json',
+    'dockerfile',
+    'css',
+    'javascript',
+    'markdown',
+    'bash',
+  },
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-  auto_install = false,
-
-  highlight = { enable = true },
-  indent = { enable = true },
+  auto_install          = false,
+  highlight             = { enable = true },
+  indent                = { enable = true },
   incremental_selection = {
     enable = true,
     keymaps = {
       init_selection = '<c-space>',
       node_incremental = '<c-space>',
       scope_incremental = '<c-s>',
-      node_decremental = '<M-space>',
+      node_decremental = '<bs>',
     },
   },
-  textobjects = {
+  textobjects           = {
     select = {
       enable = true,
       lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
@@ -473,14 +483,33 @@ end
 --  define the property 'filetypes' to the map in question.
 local servers = {
   -- gopls = {},
-  html = { filetypes = { 'html', 'twig', 'hbs' } },
+  html = { filetypes = { 'html', 'twig', 'hbs', 'tmpl', 'templ' } },
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
       telemetry = { enable = false },
     },
   },
-  tailwindcss = {},
+  tailwindcss = {
+    filetypes = {
+      'templ',
+      'html',
+      'ts',
+      'tsx',
+      'js',
+      'typescript',
+      'typescriptreact',
+      'javascript',
+      'javascriptreact'
+    },
+    init_options = {
+      userLanguages = {
+        templ = "html",
+      }
+    }
+  },
+  cssls = {},
+  templ = {}
 }
 
 -- Setup neovim lua configuration
@@ -504,6 +533,9 @@ mason_lspconfig.setup_handlers {
       on_attach = on_attach,
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
+      flags = {
+        debounce_text_changes = 150,
+      },
     }
   end
 }
@@ -551,6 +583,20 @@ require('lspconfig').tsserver.setup {
   }
 }
 
+require('lspconfig').eslint.setup {
+  on_attach = function(client, bufnr)
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      command = "EslintFixAll",
+    })
+  end,
+  settings = {
+    workingDirectory = { mode = 'location' },
+  },
+  root_dir = require('lspconfig').util.find_git_ancestor,
+}
+
+
 require('lspconfig').astro.setup {
   on_attach = on_attach,
   capabilities = capabilities,
@@ -559,6 +605,30 @@ require('lspconfig').astro.setup {
   root_dir = require("lspconfig.util").root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git"),
   typescript = {},
 }
+
+require('lspconfig').emmet_language_server.setup({
+  cmd = { "emmet-language-server", "--stdio" },
+  filetypes = { "css", "eruby", "html", "javascript", "javascriptreact", "less", "sass", "scss", "svelte", "pug",
+    "typescriptreact", "vue", "tmpl" },
+  -- Read more about this options in the [vscode docs](https://code.visualstudio.com/docs/editor/emmet#_emmet-configuration).
+  -- **Note:** only the options listed in the table are supported.
+  init_options = {
+    --- @type string[]
+    excludeLanguages = {},
+    --- @type table<string, any> [Emmet Docs](https://docs.emmet.io/customization/preferences/)
+    preferences = {},
+    --- @type boolean Defaults to `true`
+    showAbbreviationSuggestions = true,
+    --- @type "always" | "never" Defaults to `"always"`
+    showExpandedAbbreviation = "always",
+    --- @type boolean Defaults to `false`
+    showSuggestionsAsSnippets = false,
+    --- @type table<string, any> [Emmet Docs](https://docs.emmet.io/customization/syntax-profiles/)
+    syntaxProfiles = {},
+    --- @type table<string, string> [Emmet Docs](https://docs.emmet.io/customization/snippets/#variables)
+    variables = {},
+  },
+})
 
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
@@ -607,6 +677,12 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+
+vim.filetype.add({
+  extension = {
+    templ = "templ",
+  }
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
