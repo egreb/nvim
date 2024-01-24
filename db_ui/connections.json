@@ -1,0 +1,1 @@
+[{"url": "postgresql://pguser:cybrai2022@127.0.0.1:5432/user_db", "name": "baloo-user-db"}, {"url": "postgresql://simen:1234@localhost:5432/todos", "name": "todos"}]

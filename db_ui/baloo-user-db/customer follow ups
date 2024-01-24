@@ -1,0 +1,34 @@
+	 		SELECT
+				cfu.cybr_org_id,
+				od.organization_name, 
+				cfu.next_process,
+				c.mail_sent_id,
+				c.sent
+	 		FROM
+ 	 			customer_follow_ups cfu
+ 	 		LEFT JOIN (
+				SELECT 
+					c.cybr_org_id,
+					c.mail_sent_id,
+					c.sent
+				FROM customer_follow_ups_mail_sent c			
+				ORDER BY
+					c.sent DESC
+				LIMIT
+					1
+			) c
+			ON
+				cfu.cybr_org_id = NULLIF(c.cybr_org_id, '')
+			INNER JOIN 
+				organization_data od
+			ON 
+				od.cybr_org_id = cfu.cybr_org_id					
+			INNER JOIN
+				user_data ud
+			ON
+				ud.cybr_id = cfu.contact_cybr_id
+			INNER JOIN
+				organization_subscriptions os
+			ON
+				cfu.cybr_org_id = os.cybr_org_id;
+

@@ -63,6 +63,9 @@ vim.opt.rtp:prepend(lazypath)
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
+  'tpope/vim-dadbod',
+  'kristijanhusak/vim-dadbod-ui',
+  'kristijanhusak/vim-dadbod-completion',
 
   -- Git related plugins
   'tpope/vim-fugitive',
@@ -103,6 +106,14 @@ require('lazy').setup({
 
       -- Adds a number of user-friendly snippets
       'rafamadriz/friendly-snippets',
+    },
+    sources = {
+      { name = 'nvim_lsp' },
+      { name = 'luasnip' },
+      { name = 'codeium' },
+    },
+    experimental = {
+      ghost_text = true
     },
   },
 
@@ -183,11 +194,37 @@ require('lazy').setup({
     -- Optional dependencies
     dependencies = {},
   },
-  'fatih/vim-go',
+  -- 'fatih/vim-go',
+  {
+    "ray-x/go.nvim",
+    dependencies = { -- optional packages
+      "ray-x/guihua.lua",
+      "neovim/nvim-lspconfig",
+      "nvim-treesitter/nvim-treesitter",
+    },
+    config = function()
+      require("go").setup()
+    end,
+    event = { "CmdlineEnter" },
+    ft = { "go", 'gomod' },
+    build = ':lua require("go.install").update_all_sync()' -- if you need to install/update all binaries
+  },
   {
     "pmizio/typescript-tools.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
     opts = {},
+  },
+  -- Database
+  {
+    "tpope/vim-dadbod",
+    opt = true,
+    requires = {
+      "kristijanhusak/vim-dadbod-ui",
+      "kristijanhusak/vim-dadbod-completion",
+    },
+    config = function()
+      require("config.dadbod").setup()
+    end,
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -262,7 +299,16 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 
 -- autocommands
 -- format on save
-vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format()]]
+-- vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format()]]
+local format_sync_grp = vim.api.nvim_create_augroup("GoImport", {})
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.go",
+    callback = function()
+        print('format')
+        require('go.format').goimport()
+    end,
+    group = format_sync_grp,
+})
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -287,6 +333,10 @@ require('telescope').setup {
     },
   },
   pickers = {
+    oldfiles = {
+      cwd_only = true,
+      hidden = true
+    },
     find_files = {
       hidden = true
     }
@@ -476,6 +526,7 @@ vim.filetype.add({
 })
 
 require('misc')
+require('keymaps')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

@@ -32,7 +32,7 @@ local on_attach = function(_, bufnr)
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  nmap('<c-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -79,7 +79,8 @@ local servers = {
       'typescript',
       'typescriptreact',
       'javascript',
-      'javascriptreact'
+      'javascriptreact',
+      'astro'
     },
     init_options = {
       userLanguages = {
@@ -88,7 +89,7 @@ local servers = {
     }
   },
   cssls = {},
-  templ = {}
+  templ = {},
 }
 
 -- Ensure the servers above are installed
@@ -194,20 +195,6 @@ require("typescript-tools").setup {
   },
 }
 
-lspconfig.eslint.setup {
-  on_attach = function(client, bufnr)
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      buffer = bufnr,
-      command = "EslintFixAll",
-    })
-  end,
-  settings = {
-    workingDirectory = { mode = 'location' },
-  },
-  root_dir = lspconfig.util.find_git_ancestor,
-}
-
-
 lspconfig.astro.setup {
   on_attach = on_attach,
   capabilities = capabilities,
@@ -240,3 +227,23 @@ lspconfig.emmet_language_server.setup({
     variables = {},
   },
 })
+
+lspconfig.biome.setup({
+    cmd = { 'biome', 'lsp-proxy' },
+    filetypes = {
+      'javascript',
+      'javascriptreact',
+      'json',
+      'jsonc',
+      'typescript',
+      'typescript.tsx',
+      'typescriptreact',
+    },
+    root_dir = function(fname)
+      return lspconfigutils.find_package_json_ancestor(fname)
+        or lspconfigutils.find_node_modules_ancestor(fname)
+        or lspconfigutils.find_git_ancestor(fname)
+    end,
+    single_file_support = true,
+})
+

@@ -8,7 +8,7 @@ require("oil").setup({
     },
     float = {
         padding = 2,
-        max_width = 40,
+        max_width = 80,
         max_height = 40,
         border = "rounded",
     },
