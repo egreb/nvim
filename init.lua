@@ -226,6 +226,7 @@ require('lazy').setup({
       require("config.dadbod").setup()
     end,
   },
+  "stevearc/conform.nvim",
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -302,12 +303,12 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 -- vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.format()]]
 local format_sync_grp = vim.api.nvim_create_augroup("GoImport", {})
 vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = "*.go",
-    callback = function()
-        print('format')
-        require('go.format').goimport()
-    end,
-    group = format_sync_grp,
+  pattern = "*.go",
+  callback = function()
+    print('format')
+    require('go.format').goimport()
+  end,
+  group = format_sync_grp,
 })
 
 -- [[ Highlight on yank ]]
