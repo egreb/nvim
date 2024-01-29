@@ -6,6 +6,8 @@ require("conform").setup({
 		lua = { "stylua" },
 		typescript = { { "prettierd", "prettier" } },
 		javascript = { { "prettierd", "prettier" } },
+		typescriptreact = { { "prettierd", "prettier" } },
+		javascriptreact = { { "prettierd", "prettier" } },
 	},
 })
 

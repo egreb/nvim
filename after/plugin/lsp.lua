@@ -43,9 +43,9 @@ local on_attach = function(_, bufnr)
   end, '[W]orkspace [L]ist Folders')
 
   -- Create a command `:Format` local to the LSP buffer
-  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-    vim.lsp.buf.format()
-  end, { desc = 'Format current buffer with LSP' })
+  -- vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
+  --   vim.lsp.buf.format()
+  -- end, { desc = 'Format current buffer with LSP' })
 end
 
 -- Enable the following language servers
@@ -62,11 +62,11 @@ local servers = {
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-      diagnostics = {
-        -- Get the language server to recognize the `vim` global
-        globals = { 'vim' },
-      },
+      -- telemetry = { enable = false },
+      -- diagnostics = {
+      --   -- Get the language server to recognize the `vim` global
+      --   globals = { 'vim' },
+      -- },
     },
   },
   tailwindcss = {
@@ -131,30 +131,6 @@ lspconfig.gopls.setup {
   }
 }
 
--- local function organize_imports()
---   local params = {
---     command = "_typescript.organizeImports",
---     arguments = { vim.api.nvim_buf_get_name(0) },
---     title = "",
---   }
---   vim.lsp.buf.execute_command(params)
--- end
-
--- lspconfig.tsserver.setup {
---   capabilities = capabilities,
---   -- on_attach = function(client, bufnr)
---   --   client.resolved_capabilities.document_formatting = false
---   --   vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>fm", "<cmd>lua vim.lsp.buf.formatting()<CR>", {})
---   -- end,
---   on_attach = on_attach,
---   -- filetypes = { "typescript", "typescriptreact", "typescript.tsx" },
---   commands = {
---     OrganizeImports = {
---       organize_imports,
---       description = "Organize imports",
---     }
---   }
--- }
 require("typescript-tools").setup {
   on_attach = on_attach,
   settings = {
@@ -195,6 +171,7 @@ require("typescript-tools").setup {
   },
 }
 
+
 lspconfig.astro.setup {
   on_attach = on_attach,
   capabilities = capabilities,
@@ -229,21 +206,20 @@ lspconfig.emmet_language_server.setup({
 })
 
 lspconfig.biome.setup({
-    cmd = { 'biome', 'lsp-proxy' },
-    filetypes = {
-      'javascript',
-      'javascriptreact',
-      'json',
-      'jsonc',
-      'typescript',
-      'typescript.tsx',
-      'typescriptreact',
-    },
-    root_dir = function(fname)
-      return lspconfigutils.find_package_json_ancestor(fname)
+  cmd = { 'biome', 'lsp-proxy' },
+  filetypes = {
+    'javascript',
+    'javascriptreact',
+    'json',
+    'jsonc',
+    'typescript',
+    'typescript.tsx',
+    'typescriptreact',
+  },
+  root_dir = function(fname)
+    return lspconfigutils.find_package_json_ancestor(fname)
         or lspconfigutils.find_node_modules_ancestor(fname)
         or lspconfigutils.find_git_ancestor(fname)
-    end,
-    single_file_support = true,
+  end,
+  single_file_support = true,
 })
-
